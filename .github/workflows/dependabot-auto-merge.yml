@@ -2,8 +2,9 @@ name: Dependabot Auto Merge
 
 # Can run on PR events or scheduled weekly
 on:
+  workflow_dispatch:       # manual trigger
   schedule:
-    - cron: "0 9 * * 1"   # Every Monday 09:00 UTC
+    - cron: "0 9 * * 1"   # optional weekly run
   pull_request:
     types: [opened, synchronize, reopened]
 
