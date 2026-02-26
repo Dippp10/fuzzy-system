@@ -1,10 +1,9 @@
 name: Dependabot Auto Merge
 
-# Can run on PR events or scheduled weekly
 on:
-  workflow_dispatch:       # manual trigger
+  workflow_dispatch:               # Manual trigger
   schedule:
-    - cron: "0 9 * * 1"   # optional weekly run
+    - cron: "0 9 * * 1"           # Optional weekly run (Monday 09:00 UTC)
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -22,18 +21,22 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request;
-            if (!pr) return;
+            const { data: prs } = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              per_page: 50
+            });
 
-            // Only merge patch updates (x.y.Z)
-            if (pr.title.toLowerCase().includes("patch")) {
+            for (const pr of prs) {
+              if (pr.user.login !== 'dependabot[bot]') continue;
+              if (!pr.title.toLowerCase().includes("patch")) continue;
+
               await github.rest.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 pull_number: pr.number,
-                merge_method: "squash"
+                merge_method: "merge"    // ✅ Ensures PR shows in PR tab
               });
-              console.log("Patch update merged automatically.");
-            } else {
-              console.log("Not a patch update. Manual review required.");
+              console.log(`Merged PR #${pr.number}: ${pr.title}`);
             }
