@@ -3,7 +3,7 @@ name: Dependabot Auto Merge
 on:
   workflow_dispatch:               # Manual trigger
   schedule:
-    - cron: "0 9 * * 1"           # Optional weekly run (Monday 09:00 UTC)
+    - cron: "0 9 * * 1"           # Optional weekly run
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -16,9 +16,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository so git commands work
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Enable auto-merge for Dependabot PRs
       - name: Enable Dependabot Auto-Merge
         if: github.actor == 'dependabot[bot]' || github.event_name == 'workflow_dispatch'
         uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          merge-method: merge           # ✅ Ensures PR shows in Pull Requests tab
+          merge-method: merge               # ✅ PR shows in Pull Requests tab
           pull-request-number: ${{ github.event.pull_request.number }}
+          token: ${{ secrets.GITHUB_TOKEN }}
