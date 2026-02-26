@@ -1,0 +1,9 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"      # Change to pip/maven/etc if needed
+    directory: "/"                # Root of repo
+    schedule:
+      interval: "weekly"          # Runs weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "deps"
