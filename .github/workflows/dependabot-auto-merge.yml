@@ -13,30 +13,12 @@ permissions:
 
 jobs:
   auto-merge:
-    if: ${{ github.actor == 'dependabot[bot]' || github.event_name == 'workflow_dispatch' }}
     runs-on: ubuntu-latest
 
     steps:
-      - name: Auto-merge patch updates
-        uses: actions/github-script@v7
+      - name: Enable Dependabot Auto-Merge
+        if: github.actor == 'dependabot[bot]' || github.event_name == 'workflow_dispatch'
+        uses: peter-evans/enable-pull-request-automerge@v3
         with:
-          script: |
-            const { data: prs } = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              per_page: 50
-            });
-
-            for (const pr of prs) {
-              if (pr.user.login !== 'dependabot[bot]') continue;
-              if (!pr.title.toLowerCase().includes("patch")) continue;
-
-              await github.rest.pulls.merge({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                merge_method: "merge"    // ✅ Ensures PR shows in PR tab
-              });
-              console.log(`Merged PR #${pr.number}: ${pr.title}`);
-            }
+          merge-method: merge           # ✅ Ensures PR shows in Pull Requests tab
+          pull-request-number: ${{ github.event.pull_request.number }}
